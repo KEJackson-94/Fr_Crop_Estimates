@@ -1,0 +1,47 @@
+Dataset name
+------------
+
+synthetic_fertilizer
+
+
+
+Description
+-----------
+
+Agricultural use of synthetic nitrogen (N) fertilizers.
+
+The total quantity Q in principle refers to total agricultural use of
+fertilizer. In practice, however, data on non-agricultural use of fertilizer
+are scarce and the underlying statistics databases do not always account for
+non-agricultural uses. In any case, the assumption here is that Q represents
+agricultural uses only, and Q = Q_C + Q_PG, i.e., the total is partitioned
+between cropland and permanent grassland.
+
+The rates are calculated by dividing total quantities by areas of cropland
+in use (symbol C in dataset land_areas) and permanent grassland, including
+unfertilized areas (symbol PG in dataset land_areas).
+
+
+
+Variables
+---------
+
+Symbol: Q
+Label: Total quantity of synthetic N fertilizer applied
+Unit: Gg N
+
+Symbol: Q_PG
+Label: Quantity applied on permanent grassland
+Unit: Gg N
+
+Symbol: Q_C
+Label: Quantity applied on cropland
+Unit: Gg N
+
+Symbol: R_PG
+Label: Average rate on permanent grassland
+Unit: kg N/ha
+
+Symbol: R_C
+Label: Average rate on cropland
+Unit: kg N/ha
