@@ -3,6 +3,9 @@ library(dplyr) # for function mutate()
 library(forcats) # for fct_other()
 library(RColorBrewer)# create color palette()
 library(countrycode)
+library(data.table) #rbindlist() & setnames() & setDT
+library(reshape2)
+library(ggpubr) # for ggarrange()
 
 getwd() # confirm your workspace containing 'CroplandFractions.csv'
 `%ni%` <- Negate(`%in%`) # this negate of %in% is used in loop
@@ -35,6 +38,8 @@ SourceColors <- setNames(col, levels(CF_df$source)) #establish color factors for
 CF_df_sub <- subset(CF_df, source == "Ludemann_Report8" | source == "Ludemann_Report9" | source == "FAO updated")
 SourceShape <- setNames(c(8,15,17), levels(CF_df_sub$source))  #establish shape factors for Ludemann_Report8 Ludemann_Report9 & FAO_updated
 
+# tst out country_lst on one or two images
+country_lst <- country_lst[1]# test country list
 for (ii in 1:length(country_lst)){
   iso <- country_lst[ii]
   country_name <- paste(countrycode(iso,origin = 'iso3c', destination =  'country.name'),', ',iso)
@@ -56,7 +61,7 @@ for (ii in 1:length(country_lst)){
     scale_shape_manual(values = SourceShape, name = "IFA/FAO Sources") +
     theme_classic()
   p1
-  #ggsave(paste0("results//figure0930_2//",iso,".png"),p1,width=8.5, height=11) # make sure this folder exists in your workspace
+  #ggsave(paste0("results//tst//p1_",iso,".png"),p1,width=8.5, height=11) # make sure this folder exists in your workspace
 }
 
 #-------------------------------------------------------------------------------
@@ -64,22 +69,24 @@ for (ii in 1:length(country_lst)){
 
 #see lines 16-23 for Zhang_Raw df (also used in this section)
 Zhang_Filtered <- read.csv("results//Fr_Crop_Treated.csv") # originally "results//CF_Zhang_Stage23_0925.csv"
+Zhang_Filtered <-Zhang_Filtered[,-c(1)]# remove first column
 # add SD error bars and reformate table from wide to long format
-Zhang_filtered <- na.omit(melt(setDT(Zhang_filtered), id.vars = c("year","ISO3_code","Country", "SD"), variable.name = "source")) # add SD error bars and reformate table from wide to long format
-Zhang_filtered[which(Zhang_filtered$source != 'mean'),]$SD <- NA
-Zhang_filtered[which(Zhang_filtered$SD == 0),]$SD <- NA
-Zhang_filtered$U <- Zhang_filtered$value + Zhang_filtered$SD*2
-Zhang_filtered$L <- Zhang_filtered$value - Zhang_filtered$SD*2
+Zhang_Filtered <- na.omit(melt(setDT(Zhang_Filtered), id.vars = c("year","ISO3_code","Country", "SD"), variable.name = "source")) # add SD error bars and reformat table from wide to long format
+Zhang_Filtered[which(Zhang_Filtered$source != 'mean'),]$SD <- NA
+Zhang_Filtered[which(Zhang_Filtered$SD == 0),]$SD <- NA
+Zhang_Filtered$U <- Zhang_Filtered$value + Zhang_Filtered$SD*2
+Zhang_Filtered$L <- Zhang_Filtered$value - Zhang_Filtered$SD*2
 keeps <- unique(Zhang_Filtered$source)[1:7] # changed from 7to 8 on 0930
 Zhang_Stage2 <- Zhang_Filtered[which(Zhang_Filtered$source %in% keeps),]
 
 Zhang_Stage3 <- Zhang_Filtered[which(Zhang_Filtered$source %in% c('mean', 'med', 'min', 'max')),]
 
-CF_df <- read.csv("Fr_Crop_Estimates.csv")
+CF_df <- read.csv("results//Fr_Crop_Collated.csv")
 CF_df_sub <- subset(CF_df, source == "Ludemann_Report8" | source == "Ludemann_Report9" | source == "FAO updated")
 SourceShape <- setNames(c(8,15,17), levels(CF_df_sub$source))  #establish shape factors for Ludemann_Report8 Ludemann_Report9 & FAO_updated
 
 iso_lst <- unique(Zhang_Stage3$ISO3_code)
+iso_lst <-c('NZL', 'AUT', 'URY') # test AUT NZL and URY first
 for (iso in iso_lst){
   print(iso)
   
@@ -135,5 +142,5 @@ for (iso in iso_lst){
                       labels = c("A", "B","C"),
                       ncol = 1, nrow = 3)
   figure
-  #ggsave(paste0("results//figure0930//",iso,".png"),figure,width=8.5, height=11) # make sure this folder exists in your workspace
+  #ggsave(paste0("results//tst//p2_",iso,".png"),figure,width=8.5, height=11) # make sure this folder exists in your workspace
 }
